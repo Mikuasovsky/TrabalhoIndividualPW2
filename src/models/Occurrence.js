@@ -20,6 +20,10 @@ const Occurrence = sequelize.define("Occurrence", {
   location_id: { type: DataTypes.INTEGER, allowNull: false },
   current_status_id: { type: DataTypes.INTEGER, allowNull: false },
 
+  treatment_description: { type: DataTypes.TEXT },
+  resolution_date_expected: { type: DataTypes.DATE },
+  resolution_date_actual: { type: DataTypes.DATE },
+
   is_deleted: { type: DataTypes.BOOLEAN, defaultValue: false }
 }, {
   timestamps: true

@@ -1,12 +1,13 @@
 import { Router } from "express";
 import StatusController from "../controllers/StatusController.js";
+import { requireAdmin, verifyToken } from "../middlewares/auth.js";
 
 const router = Router();
 
-router.post("/", StatusController.create);
-router.get("/", StatusController.getAll);
-router.get("/:id", StatusController.getById);
-router.put("/:id", StatusController.update);
-router.delete("/:id", StatusController.delete);
+router.post("/", verifyToken, requireAdmin, StatusController.create);
+router.get("/", verifyToken, StatusController.getAll);
+router.get("/:id", verifyToken, StatusController.getById);
+router.put("/:id", verifyToken, requireAdmin, StatusController.update);
+router.delete("/:id", verifyToken, requireAdmin, StatusController.delete);
 
 export default router;
