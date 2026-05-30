@@ -5,8 +5,8 @@ import { requireAdmin, verifyToken } from "../middlewares/auth.js";
 const router = Router();
 
 router.post("/", verifyToken, requireAdmin, StatusController.create);
-router.get("/", verifyToken, StatusController.getAll);
-router.get("/:id", verifyToken, StatusController.getById);
+router.get("/", verifyToken, requireAdmin, StatusController.getAll);
+router.get("/:id", verifyToken, requireAdmin, StatusController.getById);
 router.put("/:id", verifyToken, requireAdmin, StatusController.update);
 router.delete("/:id", verifyToken, requireAdmin, StatusController.delete);
 

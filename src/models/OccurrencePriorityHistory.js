@@ -6,8 +6,8 @@ const OccurrencePriorityHistory = sequelize.define("OccurrencePriorityHistory", 
 
   occurrence_id: { type: DataTypes.INTEGER, allowNull: false },
 
-  priority: { 
-    type: DataTypes.ENUM("low", "medium", "high"),
+  priority: {
+    type: DataTypes.ENUM("baixa", "media", "alta", "critica"),
     allowNull: false
   },
 

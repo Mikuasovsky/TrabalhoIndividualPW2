@@ -3,7 +3,8 @@ import sequelize from "../config/database.js";
 
 const Status = sequelize.define("Status", {
   id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-  name: { type: DataTypes.STRING, allowNull: false }
+  name: { type: DataTypes.STRING, allowNull: false },
+  is_final: { type: DataTypes.BOOLEAN, defaultValue: false }
 }, {
   timestamps: true
 });

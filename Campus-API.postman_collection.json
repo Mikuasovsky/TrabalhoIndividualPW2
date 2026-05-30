@@ -1,0 +1,549 @@
+{
+  "info": {
+    "name": "Campus API",
+    "_postman_id": "6e5f2d84-6b7b-4ed2-9a2e-2fd28f7f4f9e",
+    "description": "Plano REST API alinhado com o projeto",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth - Register",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Joao Silva\",\n  \"email\": \"20231234@esmad.ipp.pt\",\n  \"password\": \"1234567890\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/register",
+          "host": ["{{baseUrl}}"],
+          "path": ["auth", "register"]
+        }
+      }
+    },
+    {
+      "name": "Auth - Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"20231234@esmad.ipp.pt\",\n  \"password\": \"1234567890\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["auth", "login"]
+        }
+      }
+    },
+    {
+      "name": "Categories - Create (Admin)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Iluminacao\",\n  \"description\": \"Problemas de luz\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/categories",
+          "host": ["{{baseUrl}}"],
+          "path": ["categories"]
+        }
+      }
+    },
+    {
+      "name": "Categories - List (Admin)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/categories",
+          "host": ["{{baseUrl}}"],
+          "path": ["categories"]
+        }
+      }
+    },
+    {
+      "name": "Categories - Update (Admin)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Lixo\",\n  \"description\": \"Residuos no campus\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/categories/1",
+          "host": ["{{baseUrl}}"],
+          "path": ["categories", "1"]
+        }
+      }
+    },
+    {
+      "name": "Categories - Delete (Admin)",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/categories/1",
+          "host": ["{{baseUrl}}"],
+          "path": ["categories", "1"]
+        }
+      }
+    },
+    {
+      "name": "Statuses - Create (Admin)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"submetida\",\n  \"is_final\": false\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/statuses",
+          "host": ["{{baseUrl}}"],
+          "path": ["statuses"]
+        }
+      }
+    },
+    {
+      "name": "Statuses - Update (Admin)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"em resolucao\",\n  \"is_final\": false\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/statuses/1",
+          "host": ["{{baseUrl}}"],
+          "path": ["statuses", "1"]
+        }
+      }
+    },
+    {
+      "name": "Statuses - Delete (Admin)",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/statuses/1",
+          "host": ["{{baseUrl}}"],
+          "path": ["statuses", "1"]
+        }
+      }
+    },
+    {
+      "name": "Locations - Create (User)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{userToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"building\": \"Edificio A\",\n  \"floor\": \"1\",\n  \"room\": \"A101\",\n  \"description\": \"Entrada principal\",\n  \"latitude\": 41.1821,\n  \"longitude\": -8.6064\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/locations",
+          "host": ["{{baseUrl}}"],
+          "path": ["locations"]
+        }
+      }
+    },
+    {
+      "name": "Locations - List",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{userToken}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/locations",
+          "host": ["{{baseUrl}}"],
+          "path": ["locations"]
+        }
+      }
+    },
+    {
+      "name": "Locations - Get By Id",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{userToken}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/locations/1",
+          "host": ["{{baseUrl}}"],
+          "path": ["locations", "1"]
+        }
+      }
+    },
+    {
+      "name": "Locations - Update",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{userToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"description\": \"Corredor principal\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/locations/1",
+          "host": ["{{baseUrl}}"],
+          "path": ["locations", "1"]
+        }
+      }
+    },
+    {
+      "name": "Locations - Delete",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{userToken}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/locations/1",
+          "host": ["{{baseUrl}}"],
+          "path": ["locations", "1"]
+        }
+      }
+    },
+    {
+      "name": "Occurrences - Create (User)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{userToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Luz avariada\",\n  \"description\": \"Luz do corredor nao funciona\",\n  \"category_id\": 1,\n  \"location_id\": 1,\n  \"priority\": \"baixa\",\n  \"current_status_id\": 1,\n  \"photos\": [\"https://example.com/foto1.jpg\"]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/occurrences",
+          "host": ["{{baseUrl}}"],
+          "path": ["occurrences"]
+        }
+      }
+    },
+    {
+      "name": "Occurrences - List",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{userToken}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/occurrences?page=1&limit=10",
+          "host": ["{{baseUrl}}"],
+          "path": ["occurrences"],
+          "query": [
+            { "key": "page", "value": "1" },
+            { "key": "limit", "value": "10" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Occurrences - Get By Id",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{userToken}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/occurrences/1",
+          "host": ["{{baseUrl}}"],
+          "path": ["occurrences", "1"]
+        }
+      }
+    },
+    {
+      "name": "Occurrences - Update (Owner/Admin)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{userToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Luz avariada (atualizado)\",\n  \"description\": \"Ainda nao foi resolvido\",\n  \"category_id\": 1,\n  \"location_id\": 1,\n  \"priority\": \"media\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/occurrences/1",
+          "host": ["{{baseUrl}}"],
+          "path": ["occurrences", "1"]
+        }
+      }
+    },
+    {
+      "name": "Occurrences - Delete (Owner/Admin)",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{userToken}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/occurrences/1",
+          "host": ["{{baseUrl}}"],
+          "path": ["occurrences", "1"]
+        }
+      }
+    },
+    {
+      "name": "Comments - Create",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{userToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"content\": \"Tambem reparei nisso\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/occurrences/1/comments",
+          "host": ["{{baseUrl}}"],
+          "path": ["occurrences", "1", "comments"]
+        }
+      }
+    },
+    {
+      "name": "Comments - List By Occurrence",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{userToken}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/occurrences/1/comments",
+          "host": ["{{baseUrl}}"],
+          "path": ["occurrences", "1", "comments"]
+        }
+      }
+    },
+    {
+      "name": "Comments - Flag",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{userToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"reason\": \"Linguagem inadequada\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/comments/1/flags",
+          "host": ["{{baseUrl}}"],
+          "path": ["comments", "1", "flags"]
+        }
+      }
+    },
+    {
+      "name": "Occurrences - Update Status (Employee/Admin)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{employeeToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"new_status_id\": 2,\n  \"note\": \"Em tratamento\",\n  \"expected_resolution_date\": \"2026-06-01\",\n  \"resolved_at\": null\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/occurrences/1/status",
+          "host": ["{{baseUrl}}"],
+          "path": ["occurrences", "1", "status"]
+        }
+      }
+    },
+    {
+      "name": "Occurrences - Update Priority (Employee/Admin)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{employeeToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"priority\": \"alta\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/occurrences/1/priority",
+          "host": ["{{baseUrl}}"],
+          "path": ["occurrences", "1", "priority"]
+        }
+      }
+    },
+    {
+      "name": "Employees - Validate (Admin)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"is_validated\": true\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/employees/1",
+          "host": ["{{baseUrl}}"],
+          "path": ["employees", "1"]
+        }
+      }
+    },
+    {
+      "name": "Users - Suspend (Admin)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"is_suspended\": true\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/users/1",
+          "host": ["{{baseUrl}}"],
+          "path": ["users", "1"]
+        }
+      }
+    },
+    {
+      "name": "Comments - Delete (Admin)",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/comments/1",
+          "host": ["{{baseUrl}}"],
+          "path": ["comments", "1"]
+        }
+      }
+    },
+    {
+      "name": "Statistics - By Category (Admin)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/statistics/occurrences-by-category",
+          "host": ["{{baseUrl}}"],
+          "path": ["statistics", "occurrences-by-category"]
+        }
+      }
+    },
+    {
+      "name": "Statistics - By Status (Admin)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/statistics/occurrences-by-status",
+          "host": ["{{baseUrl}}"],
+          "path": ["statistics", "occurrences-by-status"]
+        }
+      }
+    },
+    {
+      "name": "Statistics - By Building (Admin)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/statistics/occurrences-by-building",
+          "host": ["{{baseUrl}}"],
+          "path": ["statistics", "occurrences-by-building"]
+        }
+      }
+    },
+    {
+      "name": "Statistics - Monthly Evolution (Admin)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/statistics/monthly-evolution?year=2026",
+          "host": ["{{baseUrl}}"],
+          "path": ["statistics", "monthly-evolution"],
+          "query": [
+            { "key": "year", "value": "2026" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Statistics - Avg Resolution Time (Admin)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/statistics/average-resolution-time",
+          "host": ["{{baseUrl}}"],
+          "path": ["statistics", "average-resolution-time"]
+        }
+      }
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "adminToken", "value": "" },
+    { "key": "userToken", "value": "" },
+    { "key": "employeeToken", "value": "" }
+  ]
+}

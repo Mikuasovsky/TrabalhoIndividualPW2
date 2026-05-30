@@ -98,8 +98,19 @@ export default {
 
   async monthlyEvolution(req, res) {
     try {
+      const { year } = req.query;
+      const where = { is_deleted: false };
+      if (year) {
+        where.createdAt = {
+          [Sequelize.Op.between]: [
+            new Date(`${year}-01-01T00:00:00Z`),
+            new Date(`${year}-12-31T23:59:59Z`)
+          ]
+        };
+      }
+
       const data = await Occurrence.findAll({
-        where: { is_deleted: false },
+        where,
         attributes: [
           [Sequelize.fn("DATE_FORMAT", Sequelize.col("createdAt"), "%Y-%m"), "month"],
           [Sequelize.fn("COUNT", Sequelize.col("Occurrence.id")), "count"]

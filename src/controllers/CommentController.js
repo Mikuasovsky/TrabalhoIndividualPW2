@@ -18,12 +18,17 @@ export default {
         return res.status(404).json({ error: "Ocorrência não encontrada" });
       }
 
-      if (req.user?.role === "student" && isClosedStatus(occurrence.Status)) {
+      if (req.user?.role === "user" && isClosedStatus(occurrence.Status)) {
         return res.status(403).json({ error: "Ocorrência já resolvida" });
       }
 
+      const content = req.body.content || req.body.text;
+      if (!content) {
+        return res.status(400).json({ error: "Conteudo obrigatorio" });
+      }
+
       const comment = await Comment.create({
-        text: req.body.text,
+        text: content,
         user_id: req.user?.sub,
         occurrence_id: req.params.id
       });
@@ -55,7 +60,8 @@ export default {
 
   async delete(req, res) {
     try {
-      const comment = await Comment.findByPk(req.params.commentId);
+      const commentId = req.params.commentId || req.params.id;
+      const comment = await Comment.findByPk(commentId);
 
       if (!comment) {
         return res.status(404).json({ error: "Comentário não encontrado" });

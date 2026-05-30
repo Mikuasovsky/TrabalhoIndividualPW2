@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import Employee from "../models/Employee.js";
 
 const safeUser = (user) => {
   const data = user.toJSON();
@@ -8,16 +9,19 @@ const safeUser = (user) => {
   return data;
 };
 
-const normalizeRole = (role) => {
-  if (!role) return "student";
-  if (role === "student" || role === "employee") return role;
+const resolveRoleFromEmail = (email) => {
+  const match = email.match(/^([^@]+)@/);
+  if (!match) return null;
+  const prefix = match[1];
+  if (/^\d+$/.test(prefix)) return "user";
+  if (/^[a-zA-Z]/.test(prefix)) return "employee";
   return null;
 };
 
 export default {
   async register(req, res) {
     try {
-      const { name, email, password, role } = req.body || {};
+      const { name, email, password } = req.body || {};
 
       const trimmedEmail = typeof email === "string" ? email.trim() : "";
 
@@ -25,16 +29,17 @@ export default {
         return res.status(400).json({ error: "Nome, email e password sao obrigatorios" });
       }
 
-      const normalizedRole = normalizeRole(role);
-      if (!normalizedRole) {
-        return res.status(400).json({ error: "Role invalido" });
+      if (password.length < 10) {
+        return res.status(400).json({ error: "Password deve ter pelo menos 10 caracteres" });
+      }
+      const institutionalPattern = /@esmad\.ipp\.pt$/i;
+      if (!institutionalPattern.test(trimmedEmail)) {
+        return res.status(400).json({ error: "Email institucional obrigatorio" });
       }
 
-      if (normalizedRole === "student") {
-        const institutionalPattern = /@(?:[^\s@]+\.)?ipp\.pt$/i;
-        if (!institutionalPattern.test(trimmedEmail)) {
-          return res.status(400).json({ error: "Email institucional obrigatorio" });
-        }
+      const normalizedRole = resolveRoleFromEmail(trimmedEmail);
+      if (!normalizedRole) {
+        return res.status(400).json({ error: "Email institucional invalido" });
       }
 
       const existingUser = await User.findOne({ where: { email: trimmedEmail } });
@@ -52,6 +57,10 @@ export default {
         role: normalizedRole,
         is_validated: isValidated
       });
+
+      if (normalizedRole === "employee") {
+        await Employee.create({ user_id: user.id });
+      }
 
       res.status(201).json(safeUser(user));
     } catch (error) {
@@ -93,7 +102,7 @@ export default {
         { expiresIn: "15m" }
       );
 
-      res.json({ accessToken: token, user: safeUser(user) });
+      res.json({ token, user: safeUser(user) });
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: "Erro ao autenticar user" });

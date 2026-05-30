@@ -10,7 +10,8 @@ export default {
         return res.status(400).json({ error: "Motivo obrigatorio" });
       }
 
-      const comment = await Comment.findByPk(req.params.commentId);
+      const commentId = req.params.commentId || req.params.id;
+      const comment = await Comment.findByPk(commentId);
       if (!comment || comment.is_deleted) {
         return res.status(404).json({ error: "Comentário não encontrado" });
       }
@@ -20,7 +21,7 @@ export default {
         return res.status(404).json({ error: "Ocorrência não encontrada" });
       }
 
-      if (req.user?.role === "student") {
+      if (req.user?.role === "user") {
         if (String(occurrence.created_by) !== String(req.user?.sub || "")) {
           return res.status(403).json({ error: "Acesso negado" });
         }

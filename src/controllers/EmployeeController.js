@@ -71,5 +71,38 @@ export default {
       console.error(error);
       res.status(500).json({ error: "Erro ao apagar employee" });
     }
+  },
+
+  async validate(req, res) {
+    try {
+      const employee = await Employee.findByPk(req.params.id, {
+        include: [{ model: User }]
+      });
+
+      if (!employee) {
+        return res.status(404).json({ error: "Employee não encontrado" });
+      }
+
+      if (!employee.User) {
+        return res.status(404).json({ error: "User não encontrado" });
+      }
+
+      const isValidated = typeof req.body.is_validated === "boolean"
+        ? req.body.is_validated
+        : true;
+
+      await employee.User.update({ is_validated: isValidated });
+
+      return res.json({
+        id: employee.User.id,
+        name: employee.User.name,
+        email: employee.User.email,
+        role: employee.User.role,
+        is_validated: employee.User.is_validated
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: "Erro ao validar funcionario" });
+    }
   }
 };

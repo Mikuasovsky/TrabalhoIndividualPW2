@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import Occurrence from "../models/Occurrence.js";
 import User from "../models/User.js";
 import Category from "../models/Category.js";
@@ -6,10 +7,23 @@ import Status from "../models/Status.js";
 import OccurrenceStatusHistory from "../models/OccurrenceStatusHistory.js";
 import OccurrencePriorityHistory from "../models/OccurrencePriorityHistory.js";
 import Comment from "../models/Comment.js";
+import OccurrencePhoto from "../models/OccurrencePhoto.js";
 
 const isClosedStatus = (status) => {
   const name = (status?.name || "").toLowerCase();
   return ["resolvida", "resolved", "rejeitada", "rejected"].includes(name);
+};
+
+const normalizePriority = (value) => {
+  if (!value) return value;
+  const normalized = String(value).toLowerCase();
+  const map = {
+    low: "baixa",
+    medium: "media",
+    high: "alta",
+    critical: "critica"
+  };
+  return map[normalized] || normalized;
 };
 
 export default {
@@ -18,10 +32,12 @@ export default {
     try {
       const userId = String(req.user?.sub || "");
 
+      const priority = normalizePriority(req.body.priority) || "baixa";
+
       const occurrence = await Occurrence.create({
         title: req.body.title,
         description: req.body.description,
-        priority: req.body.priority,
+        priority,
         created_by: userId,
         category_id: req.body.category_id,
         location_id: req.body.location_id,
@@ -37,8 +53,18 @@ export default {
       // Histórico inicial de prioridade
       await OccurrencePriorityHistory.create({
         occurrence_id: occurrence.id,
-        priority: req.body.priority
+        priority
       });
+
+      if (Array.isArray(req.body.photos)) {
+        const photos = req.body.photos
+          .filter((url) => Boolean(url))
+          .map((url) => ({ occurrence_id: occurrence.id, url }));
+
+        if (photos.length > 0) {
+          await OccurrencePhoto.bulkCreate(photos);
+        }
+      }
 
       res.status(201).json(occurrence);
     } catch (error) {
@@ -50,25 +76,57 @@ export default {
   // Listar todas as ocorrências
   async getAll(req, res) {
     try {
-      const occurrences = await Occurrence.findAll({
-        where: { is_deleted: false },
+      const page = Number(req.query.page || 1);
+      const limit = Number(req.query.limit || 10);
+      const offset = (page - 1) * limit;
+
+      const where = { is_deleted: false };
+      if (req.query.status_id) {
+        where.current_status_id = req.query.status_id;
+      }
+      if (req.query.category_id) {
+        where.category_id = req.query.category_id;
+      }
+
+      const locationInclude = {
+        model: Location,
+        ...(req.query.building
+          ? { where: { building: { [Op.eq]: req.query.building } } }
+          : {})
+      };
+
+      const { rows, count } = await Occurrence.findAndCountAll({
+        where,
         include: [
           { model: User },
           { model: Category },
-          { model: Location },
+          locationInclude,
           { model: Status },
           { model: Comment, where: { is_deleted: false }, required: false }
-        ]
+        ],
+        distinct: true,
+        limit,
+        offset
       });
-      const role = req.user?.role;
-      if (role === "student") {
-        const filtered = occurrences.filter(
-          (occurrence) => !isClosedStatus(occurrence.Status)
-        );
-        return res.json(filtered);
-      }
 
-      return res.json(occurrences);
+      const role = req.user?.role;
+      const data = role === "user"
+        ? rows.filter((occurrence) => !isClosedStatus(occurrence.Status))
+        : rows;
+
+      return res.json({
+        data,
+        pagination: {
+          page,
+          limit,
+          total: count
+        },
+        links: {
+          self: {
+            href: `/occurrences?page=${page}&limit=${limit}`
+          }
+        }
+      });
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: "Erro ao listar ocorrências" });
@@ -92,7 +150,7 @@ export default {
         return res.status(404).json({ error: "Ocorrência não encontrada" });
       }
 
-      if (req.user?.role === "student" && isClosedStatus(occurrence.Status)) {
+      if (req.user?.role === "user" && isClosedStatus(occurrence.Status)) {
         return res.status(403).json({ error: "Ocorrência já resolvida" });
       }
 
@@ -180,18 +238,37 @@ export default {
         return res.status(404).json({ error: "Ocorrência não encontrada" });
       }
 
-      occurrence.current_status_id = req.body.status_id;
+      const statusId = req.body.new_status_id || req.body.status_id;
+      const note = req.body.note;
+      const expectedDate = req.body.expected_resolution_date;
+      const resolvedAt = req.body.resolved_at;
+
+      if (!statusId) {
+        return res.status(400).json({ error: "status_id obrigatorio" });
+      }
+
+      const currentStatus = await Status.findByPk(occurrence.current_status_id);
+      if (currentStatus?.is_final && String(occurrence.current_status_id) !== String(statusId)) {
+        return res.status(400).json({ error: "Transicao de status invalida" });
+      }
+
+      occurrence.current_status_id = statusId;
       await occurrence.save();
 
       await OccurrenceStatusHistory.create({
         occurrence_id: occurrence.id,
-        status_id: req.body.status_id
+        status_id: statusId
       });
 
-      const status = await Status.findByPk(req.body.status_id);
-      if (status && isClosedStatus(status)) {
-        await occurrence.update({ resolution_date_actual: new Date() });
-      }
+      const status = await Status.findByPk(statusId);
+      const resolutionDateActual = resolvedAt
+        || (status && isClosedStatus(status) ? new Date() : undefined);
+
+      await occurrence.update({
+        treatment_description: note || occurrence.treatment_description,
+        resolution_date_expected: expectedDate || occurrence.resolution_date_expected,
+        resolution_date_actual: resolutionDateActual || occurrence.resolution_date_actual
+      });
 
       res.json({ message: "Status atualizado com sucesso" });
     } catch (error) {
@@ -209,12 +286,17 @@ export default {
         return res.status(404).json({ error: "Ocorrência não encontrada" });
       }
 
-      occurrence.priority = req.body.priority;
+      const priority = normalizePriority(req.body.priority);
+      if (!priority) {
+        return res.status(400).json({ error: "Prioridade obrigatoria" });
+      }
+
+      occurrence.priority = priority;
       await occurrence.save();
 
       await OccurrencePriorityHistory.create({
         occurrence_id: occurrence.id,
-        priority: req.body.priority
+        priority
       });
 
       res.json({ message: "Prioridade atualizada com sucesso" });

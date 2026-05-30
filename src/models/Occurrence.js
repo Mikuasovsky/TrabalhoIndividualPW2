@@ -8,10 +8,10 @@ const Occurrence = sequelize.define("Occurrence", {
 
   description: { type: DataTypes.TEXT, allowNull: false },
 
-  priority: { 
-    type: DataTypes.ENUM("low", "medium", "high"),
+  priority: {
+    type: DataTypes.ENUM("baixa", "media", "alta", "critica"),
     allowNull: false,
-    defaultValue: "low"
+    defaultValue: "baixa"
   },
 
   // Foreign Keys
