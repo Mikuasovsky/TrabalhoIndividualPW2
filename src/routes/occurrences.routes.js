@@ -4,31 +4,40 @@ import CommentController from "../controllers/CommentController.js";
 import {
 	verifyToken,
 	requireAnyRole,
-	requireRole
+	requireRole,
+	requireAdmin
 } from "../middlewares/auth.js";
 
 const router = Router();
 
-router.post("/", verifyToken, requireRole("user"), OccurrenceController.create);
+router.post("/", verifyToken, requireAnyRole(["user", "admin", "employee"]), OccurrenceController.create);
 router.get("/", verifyToken, OccurrenceController.getAll);
+
+// Estatísticas RESTful (admin only) - deve vir antes de /:id
+router.get(
+	"/stats",
+	verifyToken,
+	requireAdmin,
+	OccurrenceController.getStats
+);
+
 router.get("/:id", verifyToken, OccurrenceController.getById);
 router.put("/:id", verifyToken, OccurrenceController.update);
 router.delete("/:id", verifyToken, OccurrenceController.delete);
 
 // Rotas específicas
-router.post(
+router.put(
 	"/:id/status",
 	verifyToken,
 	requireAnyRole(["employee", "admin"]),
 	OccurrenceController.updateStatus
 );
-router.patch(
+router.put(
 	"/:id/priority",
 	verifyToken,
 	requireAnyRole(["employee", "admin"]),
 	OccurrenceController.updatePriority
 );
-// align with plan via /occurrences/:id/status
 
 // Rotas de comentários
 router.post("/:id/comments", verifyToken, CommentController.create);

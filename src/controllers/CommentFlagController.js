@@ -7,7 +7,7 @@ export default {
     try {
       const { reason } = req.body;
       if (!reason) {
-        return res.status(400).json({ error: "Motivo obrigatorio" });
+        return res.status(400).json({ error: "Motivo obrigatório" });
       }
 
       const commentId = req.params.commentId || req.params.id;

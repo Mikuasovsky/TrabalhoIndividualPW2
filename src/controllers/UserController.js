@@ -20,7 +20,7 @@ export default {
       res.status(201).json(safeUser(user));
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: "Erro ao criar user" });
+      res.status(500).json({ error: "Erro ao criar utilizador" });
     }
   },
 
@@ -33,7 +33,7 @@ export default {
       res.json(users);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: "Erro ao listar users" });
+      res.status(500).json({ error: "Erro ao listar utilizadores" });
     }
   },
 
@@ -45,13 +45,13 @@ export default {
       });
 
       if (!user) {
-        return res.status(404).json({ error: "User não encontrado" });
+        return res.status(404).json({ error: "Utilizador não encontrado" });
       }
 
       res.json(user);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: "Erro ao buscar user" });
+      res.status(500).json({ error: "Erro ao buscar utilizador" });
     }
   },
 
@@ -61,7 +61,7 @@ export default {
       const user = await User.findByPk(req.params.id);
 
       if (!user) {
-        return res.status(404).json({ error: "User não encontrado" });
+        return res.status(404).json({ error: "Utilizador não encontrado" });
       }
 
       const payload = { ...req.body };
@@ -74,7 +74,7 @@ export default {
       res.json(safeUser(user));
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: "Erro ao atualizar user" });
+      res.status(500).json({ error: "Erro ao atualizar utilizador" });
     }
   },
 
@@ -84,15 +84,15 @@ export default {
       const user = await User.findByPk(req.params.id);
 
       if (!user) {
-        return res.status(404).json({ error: "User não encontrado" });
+        return res.status(404).json({ error: "Utilizador não encontrado" });
       }
 
       await user.destroy();
 
-      res.json({ message: "User apagado com sucesso" });
+      res.json({ message: "Utilizador apagado com sucesso" });
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: "Erro ao apagar user" });
+      res.status(500).json({ error: "Erro ao apagar utilizador" });
     }
   },
 
@@ -101,11 +101,11 @@ export default {
       const user = await User.findByPk(req.params.id);
 
       if (!user) {
-        return res.status(404).json({ error: "User não encontrado" });
+        return res.status(404).json({ error: "Utilizador não encontrado" });
       }
 
       if (user.role !== "employee") {
-        return res.status(400).json({ error: "User não é funcionário" });
+        return res.status(400).json({ error: "Utilizador não é funcionário" });
       }
 
       await user.update({ is_validated: true });
@@ -122,7 +122,7 @@ export default {
       const user = await User.findByPk(req.params.id);
 
       if (!user) {
-        return res.status(404).json({ error: "User não encontrado" });
+        return res.status(404).json({ error: "Utilizador não encontrado" });
       }
 
       const isSuspended = Boolean(req.body.is_suspended);
@@ -131,7 +131,7 @@ export default {
       return res.json(safeUser(user));
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ error: "Erro ao suspender user" });
+      return res.status(500).json({ error: "Erro ao suspender utilizador" });
     }
   }
 };

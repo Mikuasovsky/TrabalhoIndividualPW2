@@ -9,6 +9,6 @@ router.get("/", EmployeeController.getAll);
 router.get("/:id", EmployeeController.getById);
 router.put("/:id", EmployeeController.update);
 router.delete("/:id", EmployeeController.delete);
-router.patch("/:id", verifyToken, requireAdmin, EmployeeController.validate);
+router.put("/:id/validate", verifyToken, requireAdmin, EmployeeController.validate);
 
 export default router;

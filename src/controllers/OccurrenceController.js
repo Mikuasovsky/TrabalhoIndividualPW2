@@ -1,4 +1,4 @@
-import { Op } from "sequelize";
+import { Op, Sequelize } from "sequelize";
 import Occurrence from "../models/Occurrence.js";
 import User from "../models/User.js";
 import Category from "../models/Category.js";
@@ -326,6 +326,116 @@ export default {
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: "Erro ao atualizar tratamento" });
+    }
+  },
+
+  // Estatísticas - RESTful com query parameters
+  async getStats(req, res) {
+    try {
+      const { group_by, stats, year } = req.query;
+
+      // Agrupamento por categoria
+      if (group_by === "category") {
+        const data = await Occurrence.findAll({
+          where: { is_deleted: false },
+          attributes: [
+            "category_id",
+            [Sequelize.fn("COUNT", Sequelize.col("Occurrence.id")), "count"]
+          ],
+          include: [{ model: Category, attributes: ["id", "name"] }],
+          group: ["category_id", "Category.id"],
+          order: [[Sequelize.literal("count"), "DESC"]]
+        });
+        return res.json(data);
+      }
+
+      // Agrupamento por status
+      if (group_by === "status") {
+        const data = await Occurrence.findAll({
+          where: { is_deleted: false },
+          attributes: [
+            "current_status_id",
+            [Sequelize.fn("COUNT", Sequelize.col("Occurrence.id")), "count"]
+          ],
+          include: [{ model: Status, attributes: ["id", "name"] }],
+          group: ["current_status_id", "Status.id"],
+          order: [[Sequelize.literal("count"), "DESC"]]
+        });
+        return res.json(data);
+      }
+
+      // Agrupamento por building
+      if (group_by === "building") {
+        const data = await Occurrence.findAll({
+          where: { is_deleted: false },
+          attributes: [
+            [Sequelize.col("Location.building"), "building"],
+            [Sequelize.fn("COUNT", Sequelize.col("Occurrence.id")), "count"]
+          ],
+          include: [{ model: Location, attributes: [] }],
+          group: ["Location.building"],
+          order: [[Sequelize.literal("count"), "DESC"]],
+          raw: true
+        });
+        return res.json(data);
+      }
+
+      // Tempo médio de resolução
+      if (stats === "average_resolution_time") {
+        const data = await Occurrence.findAll({
+          where: {
+            is_deleted: false,
+            resolution_date_actual: { [Op.ne]: null }
+          },
+          attributes: [
+            [
+              Sequelize.fn(
+                "AVG",
+                Sequelize.literal(
+                  "TIMESTAMPDIFF(DAY, createdAt, resolution_date_actual)"
+                )
+              ),
+              "avg_days"
+            ],
+            [Sequelize.fn("COUNT", Sequelize.col("Occurrence.id")), "count"]
+          ],
+          raw: true
+        });
+        return res.json(data[0]);
+      }
+
+      // Evolução mensal
+      if (stats === "monthly_evolution") {
+        const where = { is_deleted: false };
+        if (year) {
+          where.createdAt = {
+            [Sequelize.Op.between]: [
+              new Date(`${year}-01-01T00:00:00Z`),
+              new Date(`${year}-12-31T23:59:59Z`)
+            ]
+          };
+        }
+
+        const data = await Occurrence.findAll({
+          where,
+          attributes: [
+            [Sequelize.fn("DATE_FORMAT", Sequelize.col("createdAt"), "%Y-%m"), "month"],
+            [Sequelize.fn("COUNT", Sequelize.col("Occurrence.id")), "count"]
+          ],
+          group: ["month"],
+          order: [[Sequelize.literal("month"), "ASC"]],
+          raw: true
+        });
+        return res.json(data);
+      }
+
+      // Se não houver parâmetro de estatística, retorna erro
+      return res.status(400).json({ 
+        error: "Parâmetro inválido. Use: group_by=category|status|building ou stats=average_resolution_time|monthly_evolution" 
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: "Erro ao obter estatísticas" });
     }
   }
 };

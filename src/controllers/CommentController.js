@@ -24,7 +24,7 @@ export default {
 
       const content = req.body.content || req.body.text;
       if (!content) {
-        return res.status(400).json({ error: "Conteudo obrigatorio" });
+        return res.status(400).json({ error: "Conteúdo obrigatório" });
       }
 
       const comment = await Comment.create({

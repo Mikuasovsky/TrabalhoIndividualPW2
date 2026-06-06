@@ -26,7 +26,7 @@ export default {
       const trimmedEmail = typeof email === "string" ? email.trim() : "";
 
       if (!name || !trimmedEmail || !password) {
-        return res.status(400).json({ error: "Nome, email e password sao obrigatorios" });
+        return res.status(400).json({ error: "Nome, email e password são obrigatórios" });
       }
 
       if (password.length < 10) {
@@ -65,7 +65,7 @@ export default {
       res.status(201).json(safeUser(user));
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: "Erro ao registar user" });
+      res.status(500).json({ error: "Erro ao registar utilizador" });
     }
   },
 
@@ -76,7 +76,7 @@ export default {
       const trimmedEmail = typeof email === "string" ? email.trim() : "";
 
       if (!trimmedEmail || !password) {
-        return res.status(400).json({ error: "Email e password sao obrigatorios" });
+        return res.status(400).json({ error: "Email e password são obrigatórios" });
       }
 
       const user = await User.findOne({ where: { email: trimmedEmail } });
@@ -105,7 +105,7 @@ export default {
       res.json({ token, user: safeUser(user) });
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: "Erro ao autenticar user" });
+      res.status(500).json({ error: "Erro ao autenticar utilizador" });
     }
   }
 };

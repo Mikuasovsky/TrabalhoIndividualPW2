@@ -8,7 +8,7 @@ export default {
       res.status(201).json(employee);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: "Erro ao criar employee" });
+      res.status(500).json({ error: "Erro ao criar funcionário" });
     }
   },
 
@@ -20,7 +20,7 @@ export default {
       res.json(employees);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: "Erro ao listar employees" });
+      res.status(500).json({ error: "Erro ao listar funcionários" });
     }
   },
 
@@ -31,13 +31,13 @@ export default {
       });
 
       if (!employee) {
-        return res.status(404).json({ error: "Employee não encontrado" });
+        return res.status(404).json({ error: "Funcionário não encontrado" });
       }
 
       res.json(employee);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: "Erro ao buscar employee" });
+      res.status(500).json({ error: "Erro ao buscar funcionário" });
     }
   },
 
@@ -46,14 +46,14 @@ export default {
       const employee = await Employee.findByPk(req.params.id);
 
       if (!employee) {
-        return res.status(404).json({ error: "Employee não encontrado" });
+        return res.status(404).json({ error: "Funcionário não encontrado" });
       }
 
       await employee.update(req.body);
       res.json(employee);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: "Erro ao atualizar employee" });
+      res.status(500).json({ error: "Erro ao atualizar funcionário" });
     }
   },
 
@@ -62,14 +62,14 @@ export default {
       const employee = await Employee.findByPk(req.params.id);
 
       if (!employee) {
-        return res.status(404).json({ error: "Employee não encontrado" });
+        return res.status(404).json({ error: "Funcionário não encontrado" });
       }
 
       await employee.destroy();
-      res.json({ message: "Employee apagado com sucesso" });
+      res.json({ message: "Funcionário apagado com sucesso" });
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: "Erro ao apagar employee" });
+      res.status(500).json({ error: "Erro ao apagar funcionário" });
     }
   },
 
@@ -80,11 +80,11 @@ export default {
       });
 
       if (!employee) {
-        return res.status(404).json({ error: "Employee não encontrado" });
+        return res.status(404).json({ error: "Funcionário não encontrado" });
       }
 
       if (!employee.User) {
-        return res.status(404).json({ error: "User não encontrado" });
+        return res.status(404).json({ error: "Utilizador não encontrado" });
       }
 
       const isValidated = typeof req.body.is_validated === "boolean"
@@ -102,7 +102,7 @@ export default {
       });
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ error: "Erro ao validar funcionario" });
+      return res.status(500).json({ error: "Erro ao validar funcionário" });
     }
   }
 };
