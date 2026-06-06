@@ -34,6 +34,13 @@ export default {
 
       const priority = normalizePriority(req.body.priority) || "baixa";
 
+      // Buscar status inicial se não for fornecido
+      let statusId = req.body.current_status_id;
+      if (!statusId) {
+        const initialStatus = await Status.findOne({ where: { is_final: false }, order: [["id", "ASC"]] });
+        statusId = initialStatus ? initialStatus.id : null;
+      }
+
       const occurrence = await Occurrence.create({
         title: req.body.title,
         description: req.body.description,
@@ -41,14 +48,16 @@ export default {
         created_by: userId,
         category_id: req.body.category_id,
         location_id: req.body.location_id,
-        current_status_id: req.body.current_status_id
+        current_status_id: statusId
       });
 
       // Histórico inicial de status
-      await OccurrenceStatusHistory.create({
-        occurrence_id: occurrence.id,
-        status_id: req.body.current_status_id
-      });
+      if (statusId) {
+        await OccurrenceStatusHistory.create({
+          occurrence_id: occurrence.id,
+          status_id: statusId
+        });
+      }
 
       // Histórico inicial de prioridade
       await OccurrencePriorityHistory.create({
