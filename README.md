@@ -16,6 +16,10 @@ Sistema que permite à comunidade académica reportar, acompanhar e monitorizar 
 - **Password Hashing:** bcrypt v6.0.0
 - **Environment:** dotenv v17.4.2
 
+## 🌐 Deploy
+
+A API está disponível em produção: **[https://trabalhoindividualpw2-production.up.railway.app](https://trabalhoindividualpw2-production.up.railway.app)**
+
 ## 📦 Instalação
 
 ```bash
