@@ -1,6 +1,9 @@
+// Importação do bcrypt para hash de passwords
 import bcrypt from "bcrypt";
+// Importação do modelo User
 import User from "../models/User.js";
 
+// Função auxiliar para remover a password do objeto de utilizador
 const safeUser = (user) => {
   const data = user.toJSON();
   delete data.password;
@@ -8,10 +11,11 @@ const safeUser = (user) => {
 };
 
 export default {
-  // Criar user
+  // Criar utilizador (admin only)
   async create(req, res) {
     try {
       const payload = { ...req.body };
+      // Hash da password se fornecida
       if (payload.password) {
         payload.password = await bcrypt.hash(payload.password, 10);
       }
@@ -24,11 +28,11 @@ export default {
     }
   },
 
-  // Listar todos os users
+  // Listar todos os utilizadores (admin only)
   async getAll(req, res) {
     try {
       const users = await User.findAll({
-        attributes: { exclude: ["password"] }
+        attributes: { exclude: ["password"] }  // Excluir password da resposta
       });
       res.json(users);
     } catch (error) {
@@ -37,7 +41,7 @@ export default {
     }
   },
 
-  // Buscar user por ID
+  // Buscar utilizador por ID (self ou admin)
   async getById(req, res) {
     try {
       const user = await User.findByPk(req.params.id, {
@@ -55,7 +59,7 @@ export default {
     }
   },
 
-  // Atualizar user
+  // Atualizar utilizador (self ou admin)
   async update(req, res) {
     try {
       const user = await User.findByPk(req.params.id);
@@ -65,6 +69,7 @@ export default {
       }
 
       const payload = { ...req.body };
+      // Hash da password se fornecida
       if (payload.password) {
         payload.password = await bcrypt.hash(payload.password, 10);
       }

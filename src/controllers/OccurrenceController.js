@@ -1,4 +1,6 @@
+// Importação de operadores e funções do Sequelize para queries complexas
 import { Op, Sequelize } from "sequelize";
+// Importação dos modelos necessários
 import Occurrence from "../models/Occurrence.js";
 import User from "../models/User.js";
 import Category from "../models/Category.js";
@@ -9,11 +11,13 @@ import OccurrencePriorityHistory from "../models/OccurrencePriorityHistory.js";
 import Comment from "../models/Comment.js";
 import OccurrencePhoto from "../models/OccurrencePhoto.js";
 
+// Função auxiliar para verificar se o status é final (resolvida/rejeitada)
 const isClosedStatus = (status) => {
   const name = (status?.name || "").toLowerCase();
   return ["resolvida", "resolved", "rejeitada", "rejected"].includes(name);
 };
 
+// Função auxiliar para normalizar prioridade (aceita inglês ou português)
 const normalizePriority = (value) => {
   if (!value) return value;
   const normalized = String(value).toLowerCase();
@@ -41,6 +45,7 @@ export default {
         statusId = initialStatus ? initialStatus.id : null;
       }
 
+      // Criação da ocorrência
       const occurrence = await Occurrence.create({
         title: req.body.title,
         description: req.body.description,
@@ -65,6 +70,7 @@ export default {
         priority
       });
 
+      // Criação de fotos se fornecidas
       if (Array.isArray(req.body.photos)) {
         const photos = req.body.photos
           .filter((url) => Boolean(url))
@@ -82,7 +88,7 @@ export default {
     }
   },
 
-  // Listar todas as ocorrências
+  // Listar todas as ocorrências (com paginação e filtros)
   async getAll(req, res) {
     try {
       const page = Number(req.query.page || 1);
@@ -90,13 +96,16 @@ export default {
       const offset = (page - 1) * limit;
 
       const where = { is_deleted: false };
+      // Filtro por status
       if (req.query.status_id) {
         where.current_status_id = req.query.status_id;
       }
+      // Filtro por categoria
       if (req.query.category_id) {
         where.category_id = req.query.category_id;
       }
 
+      // Filtro por building (edifício)
       const locationInclude = {
         model: Location,
         ...(req.query.building
@@ -104,6 +113,7 @@ export default {
           : {})
       };
 
+      // Query com paginação e includes
       const { rows, count } = await Occurrence.findAndCountAll({
         where,
         include: [
@@ -118,11 +128,13 @@ export default {
         offset
       });
 
+      // Users só podem ver ocorrências não resolvidas
       const role = req.user?.role;
       const data = role === "user"
         ? rows.filter((occurrence) => !isClosedStatus(occurrence.Status))
         : rows;
 
+      // Resposta com dados, paginação e links HATEOAS
       return res.json({
         data,
         pagination: {
@@ -159,6 +171,7 @@ export default {
         return res.status(404).json({ error: "Ocorrência não encontrada" });
       }
 
+      // Users não podem ver ocorrências resolvidas/rejeitadas
       if (req.user?.role === "user" && isClosedStatus(occurrence.Status)) {
         return res.status(403).json({ error: "Ocorrência já resolvida" });
       }
@@ -170,7 +183,7 @@ export default {
     }
   },
 
-  // Atualizar ocorrência
+  // Atualizar ocorrência (só criador ou admin, e só antes de tratamento)
   async update(req, res) {
     try {
       const occurrence = await Occurrence.findByPk(req.params.id);
@@ -182,10 +195,12 @@ export default {
       const userId = String(req.user?.sub || "");
       const isAdmin = req.user?.role === "admin";
 
+      // Verificar se é o criador ou admin
       if (!isAdmin && String(occurrence.created_by) !== userId) {
         return res.status(403).json({ error: "Acesso negado" });
       }
 
+      // Verificar se a ocorrência ainda não foi tratada (só para não-admins)
       if (!isAdmin) {
         const historyCount = await OccurrenceStatusHistory.count({
           where: { occurrence_id: occurrence.id }
@@ -204,7 +219,7 @@ export default {
     }
   },
 
-  // Apagar ocorrência
+  // Apagar ocorrência (soft delete, só criador ou admin, e só antes de tratamento)
   async delete(req, res) {
     try {
       const occurrence = await Occurrence.findByPk(req.params.id);
@@ -216,10 +231,12 @@ export default {
       const userId = String(req.user?.sub || "");
       const isAdmin = req.user?.role === "admin";
 
+      // Verificar se é o criador ou admin
       if (!isAdmin && String(occurrence.created_by) !== userId) {
         return res.status(403).json({ error: "Acesso negado" });
       }
 
+      // Verificar se a ocorrência ainda não foi tratada (só para não-admins)
       if (!isAdmin) {
         const historyCount = await OccurrenceStatusHistory.count({
           where: { occurrence_id: occurrence.id }
@@ -229,6 +246,7 @@ export default {
         }
       }
 
+      // Soft delete (marca como apagado mas não remove da BD)
       await occurrence.update({ is_deleted: true });
 
       return res.json({ message: "Ocorrência apagada com sucesso" });
@@ -238,7 +256,7 @@ export default {
     }
   },
 
-  // Atualizar status
+  // Atualizar status (funcionário/admin)
   async updateStatus(req, res) {
     try {
       const occurrence = await Occurrence.findByPk(req.params.id);
@@ -256,23 +274,28 @@ export default {
         return res.status(400).json({ error: "status_id obrigatorio" });
       }
 
+      // Verificar se o status atual é final (não pode mudar de resolvida/rejeitada)
       const currentStatus = await Status.findByPk(occurrence.current_status_id);
       if (currentStatus?.is_final && String(occurrence.current_status_id) !== String(statusId)) {
         return res.status(400).json({ error: "Transicao de status invalida" });
       }
 
+      // Atualizar status atual
       occurrence.current_status_id = statusId;
       await occurrence.save();
 
+      // Criar registo no histórico
       await OccurrenceStatusHistory.create({
         occurrence_id: occurrence.id,
         status_id: statusId
       });
 
+      // Se o novo status for final, definir data de resolução
       const status = await Status.findByPk(statusId);
       const resolutionDateActual = resolvedAt
         || (status && isClosedStatus(status) ? new Date() : undefined);
 
+      // Atualizar campos de tratamento
       await occurrence.update({
         treatment_description: note || occurrence.treatment_description,
         resolution_date_expected: expectedDate || occurrence.resolution_date_expected,
@@ -286,7 +309,7 @@ export default {
     }
   },
 
-  // Atualizar prioridade
+  // Atualizar prioridade (funcionário/admin)
   async updatePriority(req, res) {
     try {
       const occurrence = await Occurrence.findByPk(req.params.id);
@@ -300,9 +323,11 @@ export default {
         return res.status(400).json({ error: "Prioridade obrigatoria" });
       }
 
+      // Atualizar prioridade
       occurrence.priority = priority;
       await occurrence.save();
 
+      // Criar registo no histórico
       await OccurrencePriorityHistory.create({
         occurrence_id: occurrence.id,
         priority
@@ -315,6 +340,7 @@ export default {
     }
   },
 
+  // Atualizar informações de tratamento
   async updateTreatment(req, res) {
     try {
       const occurrence = await Occurrence.findByPk(req.params.id);

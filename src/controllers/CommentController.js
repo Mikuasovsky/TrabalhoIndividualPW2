@@ -1,13 +1,16 @@
+// Importação dos modelos necessários
 import Comment from "../models/Comment.js";
 import Occurrence from "../models/Occurrence.js";
 import Status from "../models/Status.js";
 
+// Função auxiliar para verificar se o status é final
 const isClosedStatus = (status) => {
   const name = (status?.name || "").toLowerCase();
   return ["resolvida", "resolved", "rejeitada", "rejected"].includes(name);
 };
 
 export default {
+  // Criar comentário numa ocorrência
   async create(req, res) {
     try {
       const occurrence = await Occurrence.findByPk(req.params.id, {
@@ -18,6 +21,7 @@ export default {
         return res.status(404).json({ error: "Ocorrência não encontrada" });
       }
 
+      // Users não podem comentar em ocorrências resolvidas/rejeitadas
       if (req.user?.role === "user" && isClosedStatus(occurrence.Status)) {
         return res.status(403).json({ error: "Ocorrência já resolvida" });
       }
@@ -40,6 +44,7 @@ export default {
     }
   },
 
+  // Listar comentários de uma ocorrência
   async getAll(req, res) {
     try {
       const occurrence = await Occurrence.findByPk(req.params.id);
@@ -58,6 +63,7 @@ export default {
     }
   },
 
+  // Apagar comentário (soft delete, admin only)
   async delete(req, res) {
     try {
       const commentId = req.params.commentId || req.params.id;
@@ -67,6 +73,7 @@ export default {
         return res.status(404).json({ error: "Comentário não encontrado" });
       }
 
+      // Soft delete
       await comment.update({ is_deleted: true });
 
       res.json({ message: "Comentário removido com sucesso" });

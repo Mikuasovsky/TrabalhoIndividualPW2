@@ -1,5 +1,7 @@
+// Importação do Router do Express
 import { Router } from "express";
 
+// Importação das rotas de cada módulo
 import sessionRoutes from "./sessions.routes.js";
 import userRoutes from "./users.routes.js";
 import employeeRoutes from "./employees.routes.js";
@@ -11,6 +13,7 @@ import commentRoutes from "./comments.routes.js";
 
 const router = Router();
 
+// Montagem das rotas com os seus respetivos prefixos
 router.use("/sessions", sessionRoutes);
 router.use("/users", userRoutes);
 router.use("/employees", employeeRoutes);

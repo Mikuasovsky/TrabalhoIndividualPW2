@@ -1,6 +1,8 @@
+// Importação do modelo Location
 import Location from "../models/Location.js";
 
 export default {
+  // Criar local (admin/employee)
   async create(req, res) {
     try {
       const location = await Location.create(req.body);
@@ -11,6 +13,7 @@ export default {
     }
   },
 
+  // Listar todos os locais
   async getAll(req, res) {
     try {
       const locations = await Location.findAll();
@@ -21,6 +24,7 @@ export default {
     }
   },
 
+  // Buscar local por ID
   async getById(req, res) {
     try {
       const location = await Location.findByPk(req.params.id);
@@ -36,6 +40,7 @@ export default {
     }
   },
 
+  // Atualizar local (admin/employee)
   async update(req, res) {
     try {
       const location = await Location.findByPk(req.params.id);
@@ -52,6 +57,7 @@ export default {
     }
   },
 
+  // Apagar local (admin/employee)
   async delete(req, res) {
     try {
       const location = await Location.findByPk(req.params.id);

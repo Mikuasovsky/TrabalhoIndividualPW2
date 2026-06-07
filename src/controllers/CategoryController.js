@@ -1,6 +1,8 @@
+// Importação do modelo Category
 import Category from "../models/Category.js";
 
 export default {
+  // Criar categoria (admin only)
   async create(req, res) {
     try {
       const category = await Category.create(req.body);
@@ -11,6 +13,7 @@ export default {
     }
   },
 
+  // Listar todas as categorias
   async getAll(req, res) {
     try {
       const categories = await Category.findAll();
@@ -21,6 +24,7 @@ export default {
     }
   },
 
+  // Buscar categoria por ID
   async getById(req, res) {
     try {
       const category = await Category.findByPk(req.params.id);
@@ -36,6 +40,7 @@ export default {
     }
   },
 
+  // Atualizar categoria (admin only)
   async update(req, res) {
     try {
       const category = await Category.findByPk(req.params.id);
@@ -52,6 +57,7 @@ export default {
     }
   },
 
+  // Apagar categoria (admin only)
   async delete(req, res) {
     try {
       const category = await Category.findByPk(req.params.id);

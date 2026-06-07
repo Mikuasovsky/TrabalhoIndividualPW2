@@ -1,6 +1,8 @@
+// Importação do modelo Status
 import Status from "../models/Status.js";
 
 export default {
+  // Criar status (admin only)
   async create(req, res) {
     try {
       const status = await Status.create(req.body);
@@ -11,6 +13,7 @@ export default {
     }
   },
 
+  // Listar todos os statuses
   async getAll(req, res) {
     try {
       const statuses = await Status.findAll();
@@ -21,6 +24,7 @@ export default {
     }
   },
 
+  // Buscar status por ID
   async getById(req, res) {
     try {
       const status = await Status.findByPk(req.params.id);
@@ -36,6 +40,7 @@ export default {
     }
   },
 
+  // Atualizar status (admin only)
   async update(req, res) {
     try {
       const status = await Status.findByPk(req.params.id);
@@ -52,6 +57,7 @@ export default {
     }
   },
 
+  // Apagar status (admin only)
   async delete(req, res) {
     try {
       const status = await Status.findByPk(req.params.id);

@@ -1,7 +1,9 @@
+// Importação dos modelos Employee e User
 import Employee from "../models/Employee.js";
 import User from "../models/User.js";
 
 export default {
+  // Criar funcionário (admin only)
   async create(req, res) {
     try {
       const employee = await Employee.create(req.body);
@@ -12,10 +14,11 @@ export default {
     }
   },
 
+  // Listar todos os funcionários (admin only)
   async getAll(req, res) {
     try {
       const employees = await Employee.findAll({
-        include: [{ model: User }]
+        include: [{ model: User }]  // Incluir dados do utilizador associado
       });
       res.json(employees);
     } catch (error) {
@@ -24,6 +27,7 @@ export default {
     }
   },
 
+  // Buscar funcionário por ID
   async getById(req, res) {
     try {
       const employee = await Employee.findByPk(req.params.id, {
@@ -41,6 +45,7 @@ export default {
     }
   },
 
+  // Atualizar funcionário
   async update(req, res) {
     try {
       const employee = await Employee.findByPk(req.params.id);
@@ -57,6 +62,7 @@ export default {
     }
   },
 
+  // Apagar funcionário
   async delete(req, res) {
     try {
       const employee = await Employee.findByPk(req.params.id);
@@ -73,6 +79,7 @@ export default {
     }
   },
 
+  // Validar funcionário (admin only)
   async validate(req, res) {
     try {
       const employee = await Employee.findByPk(req.params.id, {
@@ -87,10 +94,12 @@ export default {
         return res.status(404).json({ error: "Utilizador não encontrado" });
       }
 
+      // Determinar se deve validar ou invalidar
       const isValidated = typeof req.body.is_validated === "boolean"
         ? req.body.is_validated
         : true;
 
+      // Atualizar o campo is_validated do utilizador
       await employee.User.update({ is_validated: isValidated });
 
       return res.json({

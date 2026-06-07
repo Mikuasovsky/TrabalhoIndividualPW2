@@ -1,8 +1,10 @@
+// Importação dos modelos necessários
 import CommentFlag from "../models/CommentFlag.js";
 import Comment from "../models/Comment.js";
 import Occurrence from "../models/Occurrence.js";
 
 export default {
+  // Sinalizar comentário como indevido
   async create(req, res) {
     try {
       const { reason } = req.body;
@@ -21,6 +23,7 @@ export default {
         return res.status(404).json({ error: "Ocorrência não encontrada" });
       }
 
+      // Users só podem sinalizar comentários nas suas próprias ocorrências
       if (req.user?.role === "user") {
         if (String(occurrence.created_by) !== String(req.user?.sub || "")) {
           return res.status(403).json({ error: "Acesso negado" });
